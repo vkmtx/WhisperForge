@@ -4,6 +4,24 @@
 **Branch:** `feature/llm-enhancer` → `master`
 **Scope:** the LLM text-enhancement feature (speak Portuguese → polished technical English before paste) and the files it touches.
 
+## Final configuration (current)
+
+- **ASR:** Parakeet v3 (FluidAudio), on-device.
+- **LLM enhance:** **cloud Groq**, model `openai/gpt-oss-120b` (free tier); provider is switchable (OpenAI / OpenRouter / Anthropic / Ollama).
+- **Prompt:** senior-engineer default in `PromptPreset.swift` — form-adaptive (commit / message / spec), drops retracted content ("esquece" / "forget it"), never obeys questions embedded in the dictation.
+- **Audio history:** off by default (audio discarded right after transcription).
+- **Local LLM (Ollama) removed** — see postmortem.
+
+## Postmortem: local-LLM memory-pressure freeze (16 GB Mac)
+
+Running a local LLM (Ollama, qwen2.5 3B/7B, ~2 GB resident) on a 16 GB Mac froze the
+machine twice during recording, forcing a hard restart. A crash watcher captured the
+cause: at the freeze the memory compressor held ~6.4 GB and swap reached 3–13 GB with
+`llama-server` resident — system-wide memory exhaustion, **not** the dictation app
+(steady ~200 MB) and **not** Parakeet. WindowServer crashed under the thrash; no clean
+kernel panic was written (forced power-off). **Fix:** moved LLM enhancement to cloud
+(Groq) → near-zero local RAM and no model-load spike. Ollama and its models uninstalled.
+
 ## Method
 
 - **Build reproducibility:** full from-clean build (`rm -rf build SourcePackages libwhisper/build asian-autocorrect/target` → `./run.sh build`).
