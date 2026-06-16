@@ -617,7 +617,9 @@ struct SettingsView: View {
                 .tag(3)
             }
         .padding()
-        .frame(width: 550)
+        // Bounded height so long tabs (Transcription) scroll internally instead of
+        // growing the window past the screen and pushing the Done button off-screen.
+        .frame(width: 550, height: 560)
         .background(Color(.windowBackgroundColor))
         .safeAreaInset(edge: .bottom) {
             HStack {
@@ -844,7 +846,9 @@ struct SettingsView: View {
     }
     
     private var transcriptionSettings: some View {
-        Form {
+        // ScrollView (not Form) so the long content scrolls inside the bounded
+        // window instead of being clipped; sections carry their own styling.
+        ScrollView {
             VStack(spacing: 20) {
                 // Language Settings
                 VStack(alignment: .leading, spacing: 16) {
