@@ -71,6 +71,8 @@ Swift 6 (see `Scripts/patch_fluidaudio.py`).
 
 ## Credits
 
+This fork (**OpenWhisper+++**) is built and maintained by [@vkmtx](https://github.com/vkmtx).
+
 Built on [OpenSuperWhisper](https://github.com/Starmel/OpenSuperWhisper) by Starmel.
 Speech models via [whisper.cpp](https://github.com/ggerganov/whisper.cpp) and
 [FluidAudio](https://github.com/FluidInference/FluidAudio). Asian autocorrect via
