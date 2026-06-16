@@ -12,6 +12,7 @@ and fails loudly if the upstream manifest layout changes (so the build never sil
 regresses). Durable alternative: fork FluidAudio with this one line, or bump to >=0.15.
 """
 import pathlib
+import stat
 import sys
 
 DEFAULT = "SourcePackages/checkouts/FluidAudio/Package.swift"
@@ -47,6 +48,8 @@ def main() -> int:
               "patch automatically. Review the manifest manually.", file=sys.stderr)
         return 1
 
+    # SPM marks resolved checkouts read-only; add the owner write bit before patching.
+    path.chmod(path.stat().st_mode | stat.S_IWUSR)
     path.write_text(source.replace(NEEDLE, REPLACEMENT, 1))
     print("Patched FluidAudio target to Swift 5 language mode.")
     return 0

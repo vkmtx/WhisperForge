@@ -5,7 +5,7 @@ import Foundation
 /// shape is `content[0].text`.
 struct AnthropicClient: LLMClient {
     static let apiVersion = "2023-06-01"
-    static let maxTokens = 2048
+    static let maxTokens = 4096
 
     func complete(system: String, user: String, config: LLMConfig) async throws -> String {
         guard !config.model.isEmpty else { throw LLMError.emptyModel }

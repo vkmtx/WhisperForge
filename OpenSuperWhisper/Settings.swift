@@ -154,6 +154,12 @@ class SettingsViewModel: ObservableObject {
         }
     }
 
+    @Published var saveDictationHistory: Bool {
+        didSet {
+            AppPreferences.shared.saveDictationHistory = saveDictationHistory
+        }
+    }
+
     // MARK: - LLM post-processing
 
     @Published var llmEnhanceEnabled: Bool {
@@ -165,7 +171,10 @@ class SettingsViewModel: ObservableObject {
     @Published var llmProvider: String {
         didSet {
             AppPreferences.shared.llmProvider = llmProvider
-            // Each provider keeps its own Keychain credential.
+            // Reset endpoint/model so the new provider's defaults apply (empty -> default);
+            // keep each provider's own Keychain credential.
+            llmBaseURL = ""
+            llmModel = ""
             llmApiKey = KeychainHelper.get(account: llmProvider) ?? ""
         }
     }
@@ -216,6 +225,7 @@ class SettingsViewModel: ObservableObject {
         self.addSpaceAfterSentence = prefs.addSpaceAfterSentence
         self.autoCopyToClipboard = prefs.autoCopyToClipboard
         self.autoPasteTranscription = prefs.autoPasteTranscription
+        self.saveDictationHistory = prefs.saveDictationHistory
         self.llmEnhanceEnabled = prefs.llmEnhanceEnabled
         self.llmProvider = prefs.llmProvider
         self.llmBaseURL = prefs.llmBaseURL
@@ -980,6 +990,20 @@ struct SettingsView: View {
                                 .toggleStyle(SwitchToggleStyle(tint: Color.accentColor))
                                 .labelsHidden()
                         }
+
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Save dictation history")
+                                    .font(.subheadline)
+                                Text("Keep audio + transcript of each dictation. Off (default) deletes the audio right after pasting, so it never piles up on disk")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                            Toggle("", isOn: $viewModel.saveDictationHistory)
+                                .toggleStyle(SwitchToggleStyle(tint: Color.accentColor))
+                                .labelsHidden()
+                        }
                     }
                 }
                 .padding()
@@ -1162,7 +1186,7 @@ struct SettingsView: View {
     }
     
     private var advancedSettings: some View {
-        Form {
+        ScrollView {
             VStack(spacing: 20) {
                 // Decoding Strategy
                 VStack(alignment: .leading, spacing: 16) {
@@ -1269,7 +1293,7 @@ struct SettingsView: View {
     }
     
     private var shortcutSettings: some View {
-        Form {
+        ScrollView {
             VStack(spacing: 20) {
                 // Recording Trigger
                 VStack(alignment: .leading, spacing: 16) {

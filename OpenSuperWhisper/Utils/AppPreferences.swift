@@ -120,6 +120,11 @@ final class AppPreferences {
     @UserDefault(key: "autoPasteTranscription", defaultValue: true)
     var autoPasteTranscription: Bool
 
+    // When false (default), dictation audio is deleted immediately after transcription
+    // and nothing is persisted to history — prevents unbounded audio accumulation on disk.
+    @UserDefault(key: "saveDictationHistory", defaultValue: false)
+    var saveDictationHistory: Bool
+
     // LLM post-processing (text enhancement before paste).
     // The API key is NOT stored here — it lives in the Keychain (see KeychainHelper).
     @UserDefault(key: "llmEnhanceEnabled", defaultValue: false)

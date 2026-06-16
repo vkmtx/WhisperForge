@@ -1,4 +1,5 @@
 import Foundation
+import os
 import Security
 
 /// Minimal Keychain wrapper for storing LLM API keys.
@@ -25,7 +26,11 @@ enum KeychainHelper {
         // Most restrictive sensible class for an API key: only readable while the
         // device is unlocked, never synced or backed up off-device.
         add[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
-        SecItemAdd(add as CFDictionary, nil)
+        let status = SecItemAdd(add as CFDictionary, nil)
+        if status != errSecSuccess {
+            Logger(subsystem: "com.opensuperwhisper", category: "Keychain")
+                .error("Keychain write failed for account \(account, privacy: .public) (OSStatus \(status))")
+        }
     }
 
     /// Returns the secret for `account`, or nil if none is stored.

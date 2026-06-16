@@ -114,27 +114,13 @@ class IndicatorViewModel: ObservableObject {
                     print("start decoding...")
                     let text = try await transcriptionService.transcribeAudio(url: tempURL, settings: Settings())
                     
-                    // Create a new Recording instance
-                    let timestamp = Date()
-                    let fileName = "\(Int(timestamp.timeIntervalSince1970)).wav"
-                    let recordingId = UUID()
-                    let finalURL = Recording(
-                        id: recordingId,
-                        timestamp: timestamp,
-                        fileName: fileName,
-                        transcription: text,
-                        duration: 0,
-                        status: .completed,
-                        progress: 1.0,
-                        sourceFileURL: nil
-                    ).url
-                    
-                    // Move the temporary recording to final location
-                    try recorder.moveTemporaryRecording(from: tempURL, to: finalURL)
-                    
-                    // Save the recording to store
-                    await MainActor.run {
-                        self.recordingStore.addRecording(Recording(
+                    // Persist to history only if enabled. Otherwise discard the audio
+                    // immediately so dictation audio never accumulates on disk.
+                    if AppPreferences.shared.saveDictationHistory {
+                        let timestamp = Date()
+                        let fileName = "\(Int(timestamp.timeIntervalSince1970)).wav"
+                        let recordingId = UUID()
+                        let finalURL = Recording(
                             id: recordingId,
                             timestamp: timestamp,
                             fileName: fileName,
@@ -143,12 +129,31 @@ class IndicatorViewModel: ObservableObject {
                             status: .completed,
                             progress: 1.0,
                             sourceFileURL: nil
-                        ))
+                        ).url
+
+                        // Move the temporary recording to final location
+                        try recorder.moveTemporaryRecording(from: tempURL, to: finalURL)
+
+                        // Save the recording to store
+                        await MainActor.run {
+                            self.recordingStore.addRecording(Recording(
+                                id: recordingId,
+                                timestamp: timestamp,
+                                fileName: fileName,
+                                transcription: text,
+                                duration: 0,
+                                status: .completed,
+                                progress: 1.0,
+                                sourceFileURL: nil
+                            ))
+                        }
+                    } else {
+                        try? FileManager.default.removeItem(at: tempURL)
                     }
-                    
+
                     // LLM enhancement: turn raw (possibly Portuguese) speech into
-                    // polished output before pasting. The faithful transcript is
-                    // already saved to history above; only the pasted text changes.
+                    // polished output before pasting. Only the pasted text changes;
+                    // the transcript is kept in history only when history is enabled.
                     let outputText: String
                     if TextEnhancer.shared.isEnabled {
                         await MainActor.run { self.state = .enhancing }
@@ -172,9 +177,9 @@ class IndicatorViewModel: ObservableObject {
             
             print("!!! Not found record url !!!")
             
-            Task {
+            Task { [weak self] in
                 await MainActor.run {
-                    self.delegate?.didFinishDecoding()
+                    self?.delegate?.didFinishDecoding()
                 }
             }
         }
