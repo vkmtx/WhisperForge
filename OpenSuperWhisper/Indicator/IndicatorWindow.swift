@@ -7,6 +7,7 @@ enum RecordingState {
     case connecting
     case recording
     case decoding
+    case enhancing
     case busy
 }
 
@@ -145,8 +146,19 @@ class IndicatorViewModel: ObservableObject {
                         ))
                     }
                     
-                    insertText(text)
-                    print("Transcription result: \(text)")
+                    // LLM enhancement: turn raw (possibly Portuguese) speech into
+                    // polished output before pasting. The faithful transcript is
+                    // already saved to history above; only the pasted text changes.
+                    let outputText: String
+                    if TextEnhancer.shared.isEnabled {
+                        await MainActor.run { self.state = .enhancing }
+                        outputText = await TextEnhancer.shared.enhance(text)
+                    } else {
+                        outputText = text
+                    }
+
+                    await MainActor.run { self.insertText(outputText) }
+                    print("Transcription result: \(outputText)")
                 } catch {
                     print("Error transcribing audio: \(error)")
                     try? FileManager.default.removeItem(at: tempURL)
@@ -303,12 +315,23 @@ struct IndicatorWindow: View {
                     ProgressView()
                         .scaleEffect(0.7)
                         .frame(width: 24)
-                    
+
                     Text("Transcribing...")
                         .font(.system(size: 13, weight: .semibold))
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                
+
+            case .enhancing:
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .scaleEffect(0.7)
+                        .frame(width: 24)
+
+                    Text("Enhancing...")
+                        .font(.system(size: 13, weight: .semibold))
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
             case .busy:
                 HStack(spacing: 8) {
                     Image(systemName: "hourglass")
