@@ -1,73 +1,92 @@
-# OpenSuperWhisper
+# WhisperForge
 
-OpenSuperWhisper is a macOS application that provides real-time audio transcription using the Whisper model. It offers a seamless way to record and transcribe audio with customizable settings and keyboard shortcuts.
+Fast, private dictation for macOS — speak in any language and get polished
+**technical English** pasted wherever you type.
 
-<p align="center">
-<img src="docs/image.png" width="400" /> <img src="docs/image_indicator.png" width="400" />
-</p>
+On-device speech recognition (Parakeet v3 / Whisper) plus an optional LLM pass that
+rewrites your rough dictation into sharp, professional English. Local or cloud.
 
-## Features
+**A free, open-source SuperWhisper alternative for macOS** — no subscription, runs fully
+on-device, with an optional AI rewrite that turns rough multilingual speech into clean
+technical English. A privacy-friendly alternative to SuperWhisper, Wispr Flow, and
+MacWhisper.
 
-- 🎙️ Real-time audio recording and transcription
-- 🧠 Two transcription engines: [Whisper](https://github.com/ggerganov/whisper.cpp) and [Parakeet](https://github.com/AntinomyCollective/FluidAudio) — download models directly from the app
-- ⌨️ Global keyboard shortcuts — key combination or single modifier key (e.g. Left ⌘, Right ⌥, Fn)
-- ✊ Hold-to-record mode — hold the shortcut to record, release to stop
-- 📁 Drag & drop audio files for transcription with queue processing
-- 🎤 Microphone selection — switch between built-in, external, Bluetooth and iPhone (Apple Continuity) mics from the menu bar
-- 🌍 Support for multiple languages with auto-detection
-- 🇯🇵🇨🇳🇰🇷 Asian language autocorrect ([autocorrect](https://github.com/huacnlee/autocorrect))
+> A fork of [OpenSuperWhisper](https://github.com/Starmel/OpenSuperWhisper), adding an
+> AI post-processing pipeline.
 
-## Installation
+## Highlights
 
-```shell
-brew update # Optional
-brew install opensuperwhisper
+- 🎙️ Real-time dictation with a global hotkey (hold-to-record)
+- 🧠 On-device ASR — **Parakeet v3** (multilingual, ANE-accelerated) or Whisper
+- 🤖 **AI post-processing** — rewrite/translate the transcript before pasting (e.g. rough Portuguese → polished technical English)
+- ☁️ Pluggable LLM — local (Ollama / LM Studio) or cloud (Groq, OpenAI, OpenRouter, Anthropic) via an OpenAI-compatible base URL
+- 🔒 Private by default — API keys in the Keychain; dictation audio is discarded right after transcription (no history pile-up)
+- 📋 Auto-paste into the focused app; drag-and-drop file transcription
+
+## How it works
+
+```
+speak → on-device ASR transcribes → (optional) LLM rewrites to polished English → pasted
 ```
 
-Or from [GitHub releases page](https://github.com/Starmel/OpenSuperWhisper/releases).
+History is off by default: the audio is deleted the moment it is transcribed, so nothing
+accumulates on disk.
+
+## AI post-processing setup
+
+In **Settings → AI Post-processing**:
+
+1. Toggle **Enhance with AI**.
+2. Pick a **Provider** and paste an **API key** (stored in the Keychain, never on disk).
+3. Leave **Model**, **Base URL**, and **System Prompt** empty to use sensible defaults.
+
+**Recommended on low-RAM Macs:** cloud **Groq** (free tier) with `openai/gpt-oss-120b`
+— near-zero local RAM and no model-load spike. A local LLM can exhaust a 16 GB Mac during
+dictation, so prefer cloud on constrained hardware; the local ASR (Parakeet) stays
+on-device and is light.
+
+The built-in system prompt rewrites rough multilingual dictation into sharp,
+senior-engineer technical English — adapting the form to the content (commit, message, or
+spec) and dropping phrases the speaker retracts.
+
+## Build from source
+
+Requires Xcode 26+ and Homebrew packages `cmake`, `libomp`, `rust`.
+
+```bash
+git clone <this-repo-url>
+cd OpenWhisper
+git submodule update --init --recursive
+brew install cmake libomp rust
+./run.sh build        # builds the app; `./run.sh` (no arg) also launches it
+```
+
+`run.sh` builds the whisper.cpp and Rust autocorrect dependencies, then the app. It also
+applies an idempotent patch so the pinned FluidAudio (0.11.0) compiles under Xcode 26 /
+Swift 6 (see `Scripts/patch_fluidaudio.py`).
 
 ## Requirements
 
-- macOS (Apple Silicon/ARM64)
+- macOS 14+ (Apple Silicon / ARM64)
 
-## Support
+## Documentation
 
-If you encounter any issues or have questions, please:
-1. Check the existing issues in the repository
-2. Create a new issue with detailed information about your problem
-3. Include system information and logs when reporting bugs
+- [`docs/LLM_FEATURE_REVIEW.md`](docs/LLM_FEATURE_REVIEW.md) — design, code review, and
+  rationale for the AI post-processing pipeline.
 
-## Building locally
+## Credits
 
-To build locally, you'll need:
+This fork (**WhisperForge**) is built and maintained by [@vkmtx](https://github.com/vkmtx).
 
-    git clone git@github.com:Starmel/OpenSuperWhisper.git
-    cd OpenSuperWhisper
-    git submodule update --init --recursive
-    brew install cmake libomp rust ruby
-    gem install xcpretty
-    ./run.sh build
-
-In case of problems, consult `.github/workflows/build.yml` which is our CI workflow
-where the app gets built automatically on GitHub's CI.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit pull requests or create issues for bugs and feature requests.
-
-### Contribution TODO list
-
-- [ ] Streaming transcription
-- [ ] Custom dictionary / keyword boosting ([#19](https://github.com/Starmel/OpenSuperWhisper/issues/19))
-- [ ] Intel macOS compatibility ([#15](https://github.com/Starmel/OpenSuperWhisper/issues/15))
-- [ ] Agent mode ([#14](https://github.com/Starmel/OpenSuperWhisper/issues/14))
-- [x] Background app ([#8](https://github.com/Starmel/OpenSuperWhisper/issues/8))
-- [x] Support long-press single key audio recording ([#18](https://github.com/Starmel/OpenSuperWhisper/issues/18))
+Built on [OpenSuperWhisper](https://github.com/Starmel/OpenSuperWhisper) by Starmel.
+Speech models via [whisper.cpp](https://github.com/ggerganov/whisper.cpp) and
+[FluidAudio](https://github.com/FluidInference/FluidAudio). Asian autocorrect via
+[autocorrect](https://github.com/huacnlee/autocorrect).
 
 ## License
 
-OpenSuperWhisper is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+MIT — inherited from the upstream project. See [LICENSE](LICENSE).
 
-## Whisper Models
+---
 
-You can download Whisper model files (`.bin`) from the [Whisper.cpp Hugging Face repository](https://huggingface.co/ggerganov/whisper.cpp/tree/main). Place the downloaded `.bin` files in the app's models directory. On first launch, the app will attempt to copy a default model automatically, but you can add more models manually.
+<sub>**Keywords:** macOS dictation · voice to text · speech to text · open-source SuperWhisper alternative · free SuperWhisper alternative · Wispr Flow alternative · MacWhisper alternative · local Whisper dictation · Parakeet · on-device transcription · AI dictation · privacy-first speech-to-text for Mac.</sub>
