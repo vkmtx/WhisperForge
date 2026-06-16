@@ -35,7 +35,9 @@ final class AppPreferences {
     }
     
     // Engine settings
-    @UserDefault(key: "selectedEngine", defaultValue: "whisper")
+    // Default to Parakeet (FluidAudio) v3 — fast, multilingual, on-device. Whisper
+    // remains selectable. Existing users keep whatever they previously chose.
+    @UserDefault(key: "selectedEngine", defaultValue: "fluidaudio")
     var selectedEngine: String
     
     // Model settings
@@ -117,4 +119,27 @@ final class AppPreferences {
 
     @UserDefault(key: "autoPasteTranscription", defaultValue: true)
     var autoPasteTranscription: Bool
+
+    // LLM post-processing (text enhancement before paste).
+    // The API key is NOT stored here — it lives in the Keychain (see KeychainHelper).
+    @UserDefault(key: "llmEnhanceEnabled", defaultValue: false)
+    var llmEnhanceEnabled: Bool
+
+    @UserDefault(key: "llmProvider", defaultValue: "ollama")
+    var llmProvider: String
+
+    @UserDefault(key: "llmBaseURL", defaultValue: "")
+    var llmBaseURL: String
+
+    @UserDefault(key: "llmModel", defaultValue: "")
+    var llmModel: String
+
+    @UserDefault(key: "llmSystemPrompt", defaultValue: "")
+    var llmSystemPrompt: String
+
+    @UserDefault(key: "llmTemperature", defaultValue: 0.3)
+    var llmTemperature: Double
+
+    @UserDefault(key: "llmTimeoutSeconds", defaultValue: 30.0)
+    var llmTimeout: Double
 }

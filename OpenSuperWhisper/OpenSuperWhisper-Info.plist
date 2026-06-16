@@ -25,5 +25,11 @@
 	<string>OpenSuperWhisper needs accessibility access to provide system-wide functionality.</string>
 	<key>NSAppleEventsUsageDescription</key>
 	<string>OpenSuperWhisper needs accessibility access to provide system-wide functionality.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<!-- Allow plaintext HTTP to local/LAN LLM servers (Ollama, LM Studio). -->
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

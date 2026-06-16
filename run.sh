@@ -29,6 +29,18 @@ cp /opt/homebrew/opt/libomp/lib/libomp.dylib ./build/libomp.dylib
 install_name_tool -id "@rpath/libomp.dylib" ./build/libomp.dylib
 codesign --force --sign - ./build/libomp.dylib
 
+# Resolve packages, then patch FluidAudio 0.11.0 to Swift 5 mode. Xcode 26 / Swift 6
+# rejects pre-existing data races in FluidAudio's unused streaming code; this app only
+# uses the batch API. Idempotent — see Scripts/patch_fluidaudio.py.
+echo "Resolving Swift packages..."
+xcodebuild -resolvePackageDependencies -scheme OpenSuperWhisper -clonedSourcePackagesDirPath SourcePackages -skipPackagePluginValidation > /dev/null 2>&1
+echo "Patching FluidAudio (Swift 5 mode)..."
+python3 Scripts/patch_fluidaudio.py
+if [[ $? -ne 0 ]]; then
+    echo "FluidAudio patch failed!"
+    exit 1
+fi
+
 # Build the app
 echo "Building OpenSuperWhisper..."
 BUILD_OUTPUT=$(xcodebuild -scheme OpenSuperWhisper -configuration Debug -jobs 8 -derivedDataPath build -quiet -destination 'platform=macOS,arch=arm64' -skipPackagePluginValidation -skipMacroValidation -UseModernBuildSystem=YES -clonedSourcePackagesDirPath SourcePackages -skipUnavailableActions CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO OTHER_CODE_SIGN_FLAGS="--entitlements OpenSuperWhisper/OpenSuperWhisper.entitlements" build 2>&1)

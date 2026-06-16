@@ -154,6 +154,47 @@ class SettingsViewModel: ObservableObject {
         }
     }
 
+    // MARK: - LLM post-processing
+
+    @Published var llmEnhanceEnabled: Bool {
+        didSet {
+            AppPreferences.shared.llmEnhanceEnabled = llmEnhanceEnabled
+        }
+    }
+
+    @Published var llmProvider: String {
+        didSet {
+            AppPreferences.shared.llmProvider = llmProvider
+            // Each provider keeps its own Keychain credential.
+            llmApiKey = KeychainHelper.get(account: llmProvider) ?? ""
+        }
+    }
+
+    @Published var llmBaseURL: String {
+        didSet {
+            AppPreferences.shared.llmBaseURL = llmBaseURL
+        }
+    }
+
+    @Published var llmModel: String {
+        didSet {
+            AppPreferences.shared.llmModel = llmModel
+        }
+    }
+
+    @Published var llmSystemPrompt: String {
+        didSet {
+            AppPreferences.shared.llmSystemPrompt = llmSystemPrompt
+        }
+    }
+
+    /// Backed by the Keychain, never UserDefaults.
+    @Published var llmApiKey: String {
+        didSet {
+            KeychainHelper.set(llmApiKey, account: llmProvider)
+        }
+    }
+
     init() {
         let prefs = AppPreferences.shared
         self.selectedEngine = prefs.selectedEngine
@@ -175,6 +216,12 @@ class SettingsViewModel: ObservableObject {
         self.addSpaceAfterSentence = prefs.addSpaceAfterSentence
         self.autoCopyToClipboard = prefs.autoCopyToClipboard
         self.autoPasteTranscription = prefs.autoPasteTranscription
+        self.llmEnhanceEnabled = prefs.llmEnhanceEnabled
+        self.llmProvider = prefs.llmProvider
+        self.llmBaseURL = prefs.llmBaseURL
+        self.llmModel = prefs.llmModel
+        self.llmSystemPrompt = prefs.llmSystemPrompt
+        self.llmApiKey = KeychainHelper.get(account: prefs.llmProvider) ?? ""
 
         if let savedPath = prefs.selectedWhisperModelPath ?? prefs.selectedModelPath {
             self.selectedModelURL = URL(fileURLWithPath: savedPath)
@@ -928,6 +975,113 @@ struct SettingsView: View {
                             Toggle("", isOn: $viewModel.autoPasteTranscription)
                                 .toggleStyle(SwitchToggleStyle(tint: Color.accentColor))
                                 .labelsHidden()
+                        }
+                    }
+                }
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color(.controlBackgroundColor).opacity(0.3))
+                .cornerRadius(12)
+
+                // AI Post-processing (LLM)
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("AI Post-processing")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Enhance with AI (LLM)")
+                                    .font(.subheadline)
+                                Text("Rewrite/translate the transcription with an LLM before pasting")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                            Toggle("", isOn: $viewModel.llmEnhanceEnabled)
+                                .toggleStyle(SwitchToggleStyle(tint: Color.accentColor))
+                                .labelsHidden()
+                        }
+
+                        if viewModel.llmEnhanceEnabled {
+                            let provider = LLMProvider(rawValue: viewModel.llmProvider) ?? .ollama
+
+                            HStack {
+                                Text("Provider")
+                                    .font(.subheadline)
+                                Spacer()
+                                Picker("", selection: $viewModel.llmProvider) {
+                                    ForEach(LLMProvider.allCases) { option in
+                                        Text(option.displayName).tag(option.rawValue)
+                                    }
+                                }
+                                .pickerStyle(.menu)
+                                .labelsHidden()
+                                .frame(maxWidth: 220)
+                            }
+                            .padding(.top, 4)
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Base URL")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                TextField(provider.defaultBaseURL, text: $viewModel.llmBaseURL)
+                                    .textFieldStyle(.roundedBorder)
+                            }
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Model")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                TextField(provider.defaultModel, text: $viewModel.llmModel)
+                                    .textFieldStyle(.roundedBorder)
+                            }
+
+                            if provider.requiresAPIKey {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("API Key (stored in Keychain)")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    SecureField("sk-…", text: $viewModel.llmApiKey)
+                                        .textFieldStyle(.roundedBorder)
+                                }
+                            }
+
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack {
+                                    Text("System Prompt")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    Spacer()
+                                    Button("Use PT→EN technical preset") {
+                                        viewModel.llmSystemPrompt = PromptPreset.technicalEnglish.systemPrompt
+                                    }
+                                    .font(.caption)
+                                    .buttonStyle(.link)
+                                }
+                                TextEditor(text: $viewModel.llmSystemPrompt)
+                                    .font(.system(size: 12, design: .monospaced))
+                                    .frame(height: 120)
+                                    .padding(6)
+                                    .background(Color(.textBackgroundColor))
+                                    .cornerRadius(8)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                    )
+                                if viewModel.llmSystemPrompt.isEmpty {
+                                    Text("Leave empty to use the built-in Portuguese→English technical prompt.")
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+
+                            if provider.isLocal {
+                                Text("Local model — make sure Ollama / LM Studio is running.")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
                         }
                     }
                 }
