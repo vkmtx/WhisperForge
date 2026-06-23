@@ -33,7 +33,7 @@ codesign --force --sign - ./build/libomp.dylib
 # rejects pre-existing data races in FluidAudio's unused streaming code; this app only
 # uses the batch API. Idempotent — see Scripts/patch_fluidaudio.py.
 echo "Resolving Swift packages..."
-xcodebuild -resolvePackageDependencies -scheme OpenSuperWhisper -clonedSourcePackagesDirPath SourcePackages -skipPackagePluginValidation > /dev/null 2>&1
+xcodebuild -resolvePackageDependencies -scheme WhisperForge -clonedSourcePackagesDirPath SourcePackages -skipPackagePluginValidation > /dev/null 2>&1
 echo "Patching FluidAudio (Swift 5 mode)..."
 python3 Scripts/patch_fluidaudio.py
 if [[ $? -ne 0 ]]; then
@@ -42,8 +42,8 @@ if [[ $? -ne 0 ]]; then
 fi
 
 # Build the app
-echo "Building OpenSuperWhisper..."
-BUILD_OUTPUT=$(xcodebuild -scheme OpenSuperWhisper -configuration Debug -jobs 8 -derivedDataPath build -quiet -destination 'platform=macOS,arch=arm64' -skipPackagePluginValidation -skipMacroValidation -UseModernBuildSystem=YES -clonedSourcePackagesDirPath SourcePackages -skipUnavailableActions CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO OTHER_CODE_SIGN_FLAGS="--entitlements OpenSuperWhisper/OpenSuperWhisper.entitlements" build 2>&1)
+echo "Building WhisperForge..."
+BUILD_OUTPUT=$(xcodebuild -scheme WhisperForge -configuration Debug -jobs 8 -derivedDataPath build -quiet -destination 'platform=macOS,arch=arm64' -skipPackagePluginValidation -skipMacroValidation -UseModernBuildSystem=YES -clonedSourcePackagesDirPath SourcePackages -skipUnavailableActions CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO OTHER_CODE_SIGN_FLAGS="--entitlements WhisperForge/WhisperForge.entitlements" build 2>&1)
 
 # sudo gem install xcpretty
 if command -v xcpretty &> /dev/null
@@ -61,9 +61,9 @@ if [[ $? -eq 0 ]] && [[ ! "$BUILD_OUTPUT" =~ "BUILD FAILED" ]]; then
     fi
     echo "Starting the app..."
     # Remove quarantine attribute if exists
-    xattr -d com.apple.quarantine ./Build/Build/Products/Debug/OpenSuperWhisper.app 2>/dev/null || true
+    xattr -d com.apple.quarantine ./build/Build/Products/Debug/WhisperForge.app 2>/dev/null || true
     # Run the app and show logs
-    ./Build/Build/Products/Debug/OpenSuperWhisper.app/Contents/MacOS/OpenSuperWhisper
+    ./build/Build/Products/Debug/WhisperForge.app/Contents/MacOS/WhisperForge
 else
     echo "Build failed!"
     exit 1

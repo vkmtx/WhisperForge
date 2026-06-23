@@ -119,6 +119,7 @@ fastlane/build
 default.profraw
 *.profraw
 *.dmg
+*.dmg.sha256
+*.app.dSYM.zip
 .cursorrules
-OpenSuperWhisper.dmg.sha256
 dev_config.json

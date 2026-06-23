@@ -2,13 +2,13 @@
 set -e
 
 # === Configuration Variables ===
-APP_NAME="OpenSuperWhisper"                                   
-APP_PATH="./build/Build/Products/Release/OpenSuperWhisper.app"                        
-ZIP_PATH="./build/OpenSuperWhisper.zip"                        
-BUNDLE_ID="ru.starmel.OpenSuperWhisper"                       
-KEYCHAIN_PROFILE="Slava"
+APP_NAME="WhisperForge"                                   
+APP_PATH="./build/Build/Products/Release/WhisperForge.app"                        
+ZIP_PATH="./build/WhisperForge.zip"                        
+BUNDLE_ID="com.vitorsolen.WhisperForge"                       
+KEYCHAIN_PROFILE="<YOUR_NOTARY_PROFILE>"
 CODE_SIGN_IDENTITY="${1}"
-DEVELOPMENT_TEAM="8LLDD7HWZK"
+DEVELOPMENT_TEAM="<YOUR_TEAM_ID>"
 
 rm -rf libwhisper/build
 cmake -G Xcode -B libwhisper/build -S libwhisper
@@ -28,7 +28,7 @@ install_name_tool -id "@rpath/libomp.dylib" ./build/libomp.dylib
 codesign --force --sign "${CODE_SIGN_IDENTITY}" --timestamp ./build/libomp.dylib
 
 xcodebuild \
-  -scheme "OpenSuperWhisper" \
+  -scheme "WhisperForge" \
   -configuration Release \
   -destination "platform=macOS,arch=arm64" \
   CODE_SIGN_STYLE=Manual \
