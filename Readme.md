@@ -73,6 +73,10 @@ Swift 6 (see `Scripts/patch_fluidaudio.py`).
 
 - [`docs/LLM_FEATURE_REVIEW.md`](docs/LLM_FEATURE_REVIEW.md) — design, code review, and
   rationale for the AI post-processing pipeline.
+- [`docs/ROADMAP.md`](docs/ROADMAP.md) — prioritized refinement backlog (concurrency,
+  Swift 6, dependency bumps, refactors).
+- [`docs/CODEBASE_AUDIT.md`](docs/CODEBASE_AUDIT.md) — full codebase audit the roadmap is
+  derived from.
 
 ## Credits
 

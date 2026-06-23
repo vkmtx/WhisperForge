@@ -93,47 +93,6 @@ class FocusUtils {
         return NSScreen.main
     }
     
-    static func getFocusedWindowScreen() -> NSScreen? {
-        let systemWideElement = AXUIElementCreateSystemWide()
-        
-        var focusedWindow: AnyObject?
-        let result = AXUIElementCopyAttributeValue(systemWideElement,
-                                                   kAXFocusedWindowAttribute as CFString,
-                                                   &focusedWindow)
-        
-        guard result == .success else {
-            Log.debug("Failed to get the focused window")
-            return NSScreen.main
-        }
-        let windowElement = focusedWindow as! AXUIElement
-        
-        var windowFrameValue: CFTypeRef?
-        let frameResult = AXUIElementCopyAttributeValue(windowElement,
-                                                        
-                                                        "AXFrame" as CFString,
-                                                        &windowFrameValue)
-        
-        guard frameResult == .success else {
-            Log.debug("Failed to get the window frame")
-            return NSScreen.main
-        }
-        let frameValue = windowFrameValue as! AXValue
-        
-        var windowFrame = CGRect.zero
-        guard AXValueGetValue(frameValue, AXValueType.cgRect, &windowFrame) else {
-            Log.debug("Failed to extract CGRect from AXValue")
-            return NSScreen.main
-        }
-        
-        for screen in NSScreen.screens {
-            if screen.frame.intersects(windowFrame) {
-                return screen
-            }
-        }
-        
-        return NSScreen.main
-    }
-
 }
 
 private extension AXValue {

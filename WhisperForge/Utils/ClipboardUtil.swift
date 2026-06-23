@@ -180,11 +180,6 @@ class ClipboardUtil {
         }
     }
     
-    @available(*, deprecated, renamed: "insertText")
-    static func insertTextUsingPasteboard(_ text: String) {
-        insertText(text)
-    }
-    
     // MARK: - Testing Helpers
     
     static func getCurrentInputSourceID() -> String? {
