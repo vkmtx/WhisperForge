@@ -168,7 +168,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
             button.action = #selector(statusBarButtonClicked(_:))
             button.target = self
         }
-        
+
+        // Register once. updateStatusBarMenu() runs repeatedly (on every microphone
+        // change), so registering there leaked a duplicate observer each time.
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(languagePreferenceChanged),
+            name: .appPreferencesLanguageChanged,
+            object: nil
+        )
+
         updateStatusBarMenu()
     }
     
@@ -192,15 +201,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         
         transcriptionLanguageItem.submenu = languageSubmenu
         menu.addItem(transcriptionLanguageItem)
-        
-        // Listen for language preference changes
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(languagePreferenceChanged),
-            name: .appPreferencesLanguageChanged,
-            object: nil
-        )
-        
+
         menu.addItem(NSMenuItem.separator())
         
         let microphoneMenu = NSMenuItem(title: "Microphone", action: nil, keyEquivalent: "")
@@ -320,9 +321,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
                 window.makeKeyAndOrderFront(nil)
             }
             window.orderFrontRegardless()
-            NSApplication.shared.activate(ignoringOtherApps: true)
+            NSApplication.shared.activate()
         } else {
-            let url = URL(string: "openSuperWhisper://openMainWindow")!
+            let url = URL(string: "whisperforge://openMainWindow")!
             NSWorkspace.shared.open(url)
         }
     }

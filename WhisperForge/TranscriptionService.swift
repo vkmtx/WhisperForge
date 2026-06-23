@@ -31,7 +31,9 @@ class TranscriptionService: ObservableObject {
         isTranscribing = false
         currentSegment = ""
         progress = 0.0
-        isCancelled = false
+        // Leave isCancelled = true; it is reset at the start of the next
+        // transcribeAudio(). Clearing it here synchronously raced the detached
+        // task and defeated Swift-side cancellation.
     }
     
     private func loadEngine() {
@@ -101,7 +103,7 @@ class TranscriptionService: ObservableObject {
         }
         
         let durationInSeconds: Float = await (try? Task.detached(priority: .userInitiated) {
-            let asset = AVAsset(url: url)
+            let asset = AVURLAsset(url: url)
             let duration = try await asset.load(.duration)
             return Float(CMTimeGetSeconds(duration))
         }.value) ?? 0.0

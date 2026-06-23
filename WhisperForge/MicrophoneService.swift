@@ -189,7 +189,7 @@ class MicrophoneService: ObservableObject {
     func isBluetoothMicrophone(_ device: AudioDevice) -> Bool {
         if let avDevice = AVCaptureDevice(uniqueID: device.id) {
             let transportType = avDevice.transportType
-            if transportType == 1651275109 {
+            if transportType == Int32(kAudioDeviceTransportTypeBluetooth) {
                 return true
             }
         }
@@ -207,7 +207,7 @@ class MicrophoneService: ObservableObject {
         
         if hasMACAddress {
             let transportType = getTransportType(for: device)
-            return transportType == 1651275109
+            return transportType == Int32(kAudioDeviceTransportTypeBluetooth)
         }
         
         return false

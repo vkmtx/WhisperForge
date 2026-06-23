@@ -20,10 +20,10 @@ class FocusUtils {
     }
     
     static func getCaretRect() -> CGRect? {
-        // Получаем системный элемент для доступа ко всему UI
+        // Get the system-wide element to access the whole UI
         let systemElement = AXUIElementCreateSystemWide()
         
-        // Получаем фокусированный элемент
+        // Get the focused element
         var focusedElement: CFTypeRef? // Keep as CFTypeRef? if you prefer
         let errorFocused = AXUIElementCopyAttributeValue(systemElement,
                                                          kAXFocusedUIElementAttribute as CFString,
@@ -31,17 +31,17 @@ class FocusUtils {
         
         Log.debug("errorFocused: \(errorFocused)")
         guard errorFocused == .success else {
-            Log.debug("Не удалось получить фокусированный элемент")
+            Log.debug("Failed to get the focused element")
             return nil
         }
         
         guard let focusedElementCF = focusedElement else { // Optional binding to safely unwrap CFTypeRef
-            Log.debug("Не удалось получить фокусированный элемент (CFTypeRef is nil)") // Extra safety check, though unlikely
+            Log.debug("Failed to get the focused element (CFTypeRef is nil)") // Extra safety check, though unlikely
             return nil
         }
         
         let element = focusedElementCF as! AXUIElement
-        // Получаем выделенный текстовый диапазон у фокусированного элемента
+        // Get the selected text range of the focused element
         var selectedTextRange: AnyObject?
         let errorRange = AXUIElementCopyAttributeValue(element,
                                                        kAXSelectedTextRangeAttribute as CFString,
@@ -49,11 +49,11 @@ class FocusUtils {
         guard errorRange == .success,
               let textRange = selectedTextRange
         else {
-            Log.debug("Не удалось получить диапазон выделенного текста")
+            Log.debug("Failed to get the selected text range")
             return nil
         }
         
-        // Используем параметризованный атрибут для получения границ диапазона (положение каретки)
+        // Use the parameterized attribute to get the range bounds (caret position)
         var caretBounds: CFTypeRef?
         let errorBounds = AXUIElementCopyParameterizedAttributeValue(element,
                                                                      kAXBoundsForRangeParameterizedAttribute as CFString,
@@ -62,7 +62,7 @@ class FocusUtils {
         
         Log.debug("errorbounds: \(errorBounds), caretBounds \(String(describing: caretBounds))")
         guard errorBounds == .success else {
-            Log.debug("Не удалось получить границы каретки")
+            Log.debug("Failed to get the caret bounds")
             return nil
         }
         
@@ -102,7 +102,7 @@ class FocusUtils {
                                                    &focusedWindow)
         
         guard result == .success else {
-            Log.debug("Не удалось получить сфокусированное окно")
+            Log.debug("Failed to get the focused window")
             return NSScreen.main
         }
         let windowElement = focusedWindow as! AXUIElement
@@ -114,14 +114,14 @@ class FocusUtils {
                                                         &windowFrameValue)
         
         guard frameResult == .success else {
-            Log.debug("Не удалось получить фрейм окна")
+            Log.debug("Failed to get the window frame")
             return NSScreen.main
         }
         let frameValue = windowFrameValue as! AXValue
         
         var windowFrame = CGRect.zero
         guard AXValueGetValue(frameValue, AXValueType.cgRect, &windowFrame) else {
-            Log.debug("Не удалось извлечь CGRect из AXValue")
+            Log.debug("Failed to extract CGRect from AXValue")
             return NSScreen.main
         }
         

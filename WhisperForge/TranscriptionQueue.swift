@@ -99,7 +99,7 @@ class TranscriptionQueue: ObservableObject {
     func addFileToQueue(url: URL) async {
         do {
             let durationInSeconds = await (try? Task.detached(priority: .userInitiated) {
-                let asset = AVAsset(url: url)
+                let asset = AVURLAsset(url: url)
                 let duration = try await asset.load(.duration)
                 return CMTimeGetSeconds(duration)
             }.value) ?? 0.0

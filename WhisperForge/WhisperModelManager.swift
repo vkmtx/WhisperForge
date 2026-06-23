@@ -18,11 +18,14 @@ class WhisperDownloadDelegate: NSObject, URLSessionTaskDelegate, URLSessionDownl
     
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
       
-        if expectedContentLength == 0 {
+        if expectedContentLength <= 0 {
             expectedContentLength = totalBytesExpectedToWrite
         }
+        // Server may omit Content-Length (totalBytesExpectedToWrite == -1): skip
+        // until a positive total is known to avoid NaN/Inf progress.
+        guard expectedContentLength > 0 else { return }
         let progress = Double(totalBytesWritten) / Double(expectedContentLength)
-        
+
         DispatchQueue.main.async { [weak self] in
             self?.progressCallback(progress)
         }
@@ -49,7 +52,7 @@ class WhisperModelManager {
     
     var modelsDirectory: URL {
         let applicationSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        let modelsDirectory = applicationSupport.appendingPathComponent(Bundle.main.bundleIdentifier!).appendingPathComponent(modelsDirectoryName)
+        let modelsDirectory = applicationSupport.appendingPathComponent((Bundle.main.bundleIdentifier ?? "com.vitorsolen.WhisperForge")).appendingPathComponent(modelsDirectoryName)
         return modelsDirectory
     }
     
