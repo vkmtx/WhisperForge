@@ -55,7 +55,7 @@ Requires Xcode 26+ and Homebrew packages `cmake`, `libomp`, `rust`.
 
 ```bash
 git clone <this-repo-url>
-cd OpenWhisper
+cd WhisperForge
 git submodule update --init --recursive
 brew install cmake libomp rust
 ./run.sh build        # builds the app; `./run.sh` (no arg) also launches it
