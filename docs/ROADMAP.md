@@ -79,6 +79,10 @@ errors once Swift 6 is enabled, and some can already misbehave at runtime.
   --recursive` to a `bootstrap.sh`/`run.sh` and pin to known-good commits for reproducibility.
 - **CI determinism** (`.github/workflows/build.yml`): pin `runs-on: macos-15` (not
   `macos-latest`) and pin Xcode via `maxim-lobanov/setup-xcode`.
+- **Make the build a required check.** A non-compiling commit reached `master` (the
+  KeyboardShortcuts 3.0 bump #9 — fixed on this branch). `run.sh` correctly exits non-zero
+  on failure, so enable branch protection requiring the `Build Check` workflow to pass
+  before merge, and disable dependabot auto-merge until green.
 - **Align deployment target.** App configs say `14.0`, project-level + tests say `15.1`,
   CMake + README say `14.0`. Pick one floor and make pbxproj + CMake + README + cask agree.
 
@@ -124,6 +128,9 @@ errors once Swift 6 is enabled, and some can already misbehave at runtime.
 
 ## Shipped on `rebrand-and-refine`
 
+- **Made the project compile again.** `master` had not built since the KeyboardShortcuts
+  3.0 bump (#9) annotated its APIs `@MainActor`; `ShortcutManager` is now `@MainActor`.
+  Verified with `./run.sh build` → `** BUILD SUCCEEDED **`.
 - Full rebrand OpenSuperWhisper → WhisperForge (dirs, `.xcodeproj`, 3 targets, scheme,
   struct, tests, bundle id `com.vitorsolen.WhisperForge`, keychain service, Logger subsystems,
   scripts, Homebrew cask, LICENSE attribution, README). Cleared upstream Apple Team.
