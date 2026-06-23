@@ -11,6 +11,7 @@ extension KeyboardShortcuts.Name {
     static let escape = Self("escape", default: .init(.escape))
 }
 
+@MainActor
 class ShortcutManager {
     static let shared = ShortcutManager()
 
@@ -78,12 +79,14 @@ class ShortcutManager {
             useModifierOnlyHotkey = true
             KeyboardShortcuts.disable(.toggleRecord)
             
+            // ModifierKeyMonitor invokes these on the main queue (DispatchQueue.main.async),
+            // so assumeIsolated is safe and avoids an extra async hop into @MainActor.
             ModifierKeyMonitor.shared.onKeyDown = { [weak self] in
-                self?.handleKeyDown()
+                MainActor.assumeIsolated { self?.handleKeyDown() }
             }
-            
+
             ModifierKeyMonitor.shared.onKeyUp = { [weak self] in
-                self?.handleKeyUp()
+                MainActor.assumeIsolated { self?.handleKeyUp() }
             }
             
             ModifierKeyMonitor.shared.start(modifierKey: modifierKey)

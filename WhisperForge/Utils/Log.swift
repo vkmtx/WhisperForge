@@ -27,6 +27,7 @@ enum Log {
     /// Ships in Release. The message is marked public, so pass diagnostics only —
     /// never the user's transcript, speech, or other private content.
     static func error(_ message: @autoclosure () -> String) {
-        general.error("\(message(), privacy: .public)")
+        let text = message()
+        general.error("\(text, privacy: .public)")
     }
 }
