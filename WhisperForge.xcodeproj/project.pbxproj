@@ -154,7 +154,6 @@
 		CE84DF432D5557F600C54EA6 /* libwhisper.1.7.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libwhisper.1.7.4.dylib; path = ../../../../usr/local/lib/libwhisper.1.7.4.dylib; sourceTree = "<group>"; };
 		CE84DF462D5557FE00C54EA6 /* libggml-metal.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libggml-metal.dylib"; path = "../../../../usr/local/lib/libggml-metal.dylib"; sourceTree = "<group>"; };
 		CE84DF472D5557FE00C54EA6 /* libggml.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libggml.dylib; path = ../../../../usr/local/lib/libggml.dylib; sourceTree = "<group>"; };
-		CE84DF532D55615600C54EA6 /* libwhisper.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libwhisper.a; path = "../../Library/Developer/Xcode/DerivedData/WhisperForge-hahlbuibzstrsfgaftshbjlrlesk/SourcePackages/checkouts/whisper.cpp/build/src/libwhisper.a"; sourceTree = "<group>"; };
 		CE84DF632D55762200C54EA6 /* libggml.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libggml.a; sourceTree = "<group>"; };
 		CE84DF642D55762200C54EA6 /* libggml-cpu.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libggml-cpu.a"; sourceTree = "<group>"; };
 		CE84DF652D55762200C54EA6 /* libggml-metal.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libggml-metal.a"; sourceTree = "<group>"; };
@@ -261,7 +260,6 @@
 				CE84DF6F2D55778000C54EA6 /* Metal.framework */,
 				CE84DF702D55778000C54EA6 /* MetalKit.framework */,
 				CE84DF6D2D55777800C54EA6 /* libc++.tbd */,
-				CE84DF532D55615600C54EA6 /* libwhisper.a */,
 				CE84DF632D55762200C54EA6 /* libggml.a */,
 				CE84DF662D55762200C54EA6 /* libggml-base.a */,
 				CE84DF642D55762200C54EA6 /* libggml-cpu.a */,
